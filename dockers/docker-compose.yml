@@ -1,0 +1,22 @@
+services:
+  devs:
+    build:
+      context: .
+      # args:
+      #   GIT_BRANCH_NAME: ${GIT_BRANCH_NAME}
+      #   APP_DIR_NAME: ${APP_DIR_NAME}      
+      #   GIT_URI: ${GIT_URI}      
+    # depends_on:
+    #   - db_mongodb
+    # ports:
+      # - "8000:8000"  # LangGraph Studio
+  #   - "8080:8080"  # VS Code 서버    
+    # environment:
+    #   - AUTH=none  # VS Code 서버 인증 비활성화        
+    command: sleep infinity
+  # db_mongodb:
+  #   image: mongo:7
+  #   restart: always
+  #   ports:
+  #     - 27017:27017
+  #   command: mongod --bind_ip 0.0.0.0      

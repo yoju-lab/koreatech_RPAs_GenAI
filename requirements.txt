@@ -1,0 +1,15 @@
+openai==1.68.2
+jupyter
+notebook
+numpy
+pandas
+pytest
+black
+pylint
+dotenv
+beautifulsoup4
+matplotlib
+seaborn
+tabulate
+scipy
+scikit-learn
