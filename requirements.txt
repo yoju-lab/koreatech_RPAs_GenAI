@@ -13,3 +13,5 @@ seaborn
 tabulate
 scipy
 scikit-learn
+xlwings
+openpyxl

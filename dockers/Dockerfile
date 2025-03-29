@@ -1,4 +1,4 @@
-FROM python:3.11
+FROM python:3.12
 
 ARG GIT_BRANCH_NAME
 ARG APP_DIR_NAME
@@ -16,10 +16,10 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /apps
 
 # Clone the Git repository. Here we dynamically specify the repository name using the variable defined earlier.
-RUN git clone -b main https://github.com/yoju-lab/koreatech_rpas koreatech_rpas
+RUN git clone -b main https://github.com/yoju-lab/koreatech_RPAs_GenAI koreatech_RPAs_GenAI
 
 # Changes the working directory to /app/${REPO_NAME}. This uses the variable to dynamically set the directory path.
-WORKDIR /apps/koreatech_rpas
+WORKDIR /apps/koreatech_RPAs_GenAI
 
 RUN pip install --no-cache-dir -r ./requirements.txt
 
