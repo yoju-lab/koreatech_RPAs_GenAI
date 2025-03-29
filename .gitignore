@@ -173,4 +173,4 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 !dockers/.env
-codes/05_make_excel_to_reports/genai_rpa*.xls*
+genai_rpa*.xls*
