@@ -1,10 +1,12 @@
+import os
 from openpyxl import load_workbook
 
-# 엑셀 파일 경로
-file_path = '/apps/koreatech_rpas/codes/01_set_configs/1-3_xlwings_test.xlsx'
+# 현재 스크립트 파일의 디렉토리 경로를 가져옵니다.
+current_dir = os.path.dirname(os.path.abspath(__file__))
+excel_file_path = os.path.join(current_dir, '02_test.xlsx')
 
-# 엑셀 파일 로드
-wb = load_workbook(filename=file_path)
+# 엑셀 파일 열기
+wb = load_workbook(filename=excel_file_path)
 sheet = wb.active
 
 # B1과 B2의 값을 가져옵니다.
@@ -20,8 +22,8 @@ else:
 # 결과를 B3 셀에 입력합니다.
 sheet['B3'] = result
 
-# 변경 사항 저장
-wb.save(filename=file_path)
+# 엑셀 파일 저장
+wb.save(filename=excel_file_path)
 wb.close()
 
 print("B1 - B2 =", result)
