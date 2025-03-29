@@ -15,7 +15,9 @@ client_secret = os.getenv("NAVER_CLIENT_SECRET")
 encText = urllib.parse.quote("포켄스")
 # url = "https://openapi.naver.com/v1/search/blog.xml?query=" + encText # XML 결과
 # url = "https://openapi.naver.com/v1/search/shop?sort=date&query=" + encText # JSON 결과
-url = "https://openapi.naver.com/v1/search/shop?display=20&sort=date&query=" + encText # JSON 결과
+# url = "https://openapi.naver.com/v1/search/shop?display=20&sort=date&query=" + encText # JSON 결과
+# url = "https://openapi.naver.com/v1/search/news?display=20&sort=date&query=" + encText # JSON 결과
+url = "https://openapi.naver.com/v1/search/image?display=20&sort=date&query=" + encText # JSON 결과
 request = urllib.request.Request(url)
 request.add_header("X-Naver-Client-Id",client_id)
 request.add_header("X-Naver-Client-Secret",client_secret)
