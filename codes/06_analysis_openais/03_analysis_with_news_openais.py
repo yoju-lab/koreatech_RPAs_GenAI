@@ -240,6 +240,8 @@ def update_now_report(wb, analysis):
 
     # 현재 날짜와 시간(년-월-일 시:분:초) 포맷팅
     current_dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    now_sheet.cell(row=1, column=1, value=f"일일 업무 리포트")
+
     now_sheet.cell(row=3, column=1, value=f"{current_dt} 기준")
 
     now_sheet.cell(row=4, column=1, value=f"오픈 마켓 리포트")

@@ -1,27 +1,30 @@
-import openpyxl
-import datetime
-import shutil
-import pandas as pd
-import json
 import os
+import sys
+import json
+import shutil
+import datetime
 import urllib.request
-from dotenv import load_dotenv
+import pandas as pd
+import openpyxl
 from openai import OpenAI
+from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
-# Retrieve API keys and constants
+# API credentials
 client_id = os.getenv("NAVER_CLIENT_ID")
 client_secret = os.getenv("NAVER_CLIENT_SECRET")
 openai_api_key = os.getenv("OPENAI_API_KEY")
 encText = urllib.parse.quote("포켄스")
-current_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)))
-file_path = os.path.join(current_folder, 'genai_rpa.xlsx')
 
-# Initialize OpenAI client
+# OpenAI client setup
 client = OpenAI(api_key=openai_api_key)
 openai_model = "gpt-4o-mini"
+
+# File paths
+current_folder = os.path.dirname(os.path.abspath(__file__))
+file_path = os.path.join(current_folder, 'genai_rpa.xlsx')
 
 
 def create_workbook_if_not_exists():
@@ -40,7 +43,7 @@ def create_workbook_if_not_exists():
 
 def convert_json_to_dataframe(json_result):
     """
-    Convert JSON result to a pandas DataFrame with a ranking column.
+    Convert JSON result to a pandas DataFrame with an added '순위' column.
     """
     if isinstance(json_result, str):
         json_result = json.loads(json_result)
@@ -51,11 +54,12 @@ def convert_json_to_dataframe(json_result):
     return df
 
 
-def fetch_naver_api_data(api_url):
+def fetch_naver_api_data(api_type):
     """
-    Fetch data from the Naver API.
+    Fetch data from Naver API (shopping or news) based on the given type.
     """
-    request = urllib.request.Request(api_url)
+    base_url = f"https://openapi.naver.com/v1/search/{api_type}?sort=date&display=20&query={encText}"
+    request = urllib.request.Request(base_url)
     request.add_header("X-Naver-Client-Id", client_id)
     request.add_header("X-Naver-Client-Secret", client_secret)
     response = urllib.request.urlopen(request)
@@ -68,7 +72,7 @@ def fetch_naver_api_data(api_url):
 
 def handle_list_sheet(wb):
     """
-    Manage the 'now_list' and 'prev_list' sheets in the workbook.
+    Manage 'now_list' and 'prev_list' sheets in the workbook.
     """
     timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
     backup_file = os.path.join(current_folder, f"genai_rpa_{timestamp}.xlsx")
@@ -83,7 +87,7 @@ def handle_list_sheet(wb):
         wb['now_list'].title = 'prev_list'
         print("Sheet 'now_list' renamed to 'prev_list'.")
     else:
-        print("Sheet 'now_list' not found. Please check the workbook.")
+        print("Sheet 'now_list' not found.")
         return False
 
     wb.create_sheet(title="now_list", index=wb.sheetnames.index('prev_list') + 1)
@@ -93,7 +97,7 @@ def handle_list_sheet(wb):
 
 def update_sheet_with_dataframe(sheet, dataframe):
     """
-    Update a worksheet with the contents of a DataFrame.
+    Clear and update the given sheet with data from the DataFrame.
     """
     for row in sheet.iter_rows():
         for cell in row:
@@ -102,11 +106,12 @@ def update_sheet_with_dataframe(sheet, dataframe):
     for r_idx, row in enumerate(dataframe.itertuples(index=False), start=1):
         for c_idx, value in enumerate(row, start=1):
             sheet.cell(row=r_idx, column=c_idx, value=value)
+    print(f"Sheet '{sheet.title}' updated.")
 
 
-def generate_openai_analysis(prompt):
+def call_openai_api(prompt):
     """
-    Generate analysis using OpenAI API based on the provided prompt.
+    Call OpenAI API with the given prompt and return the response.
     """
     completion = client.chat.completions.create(
         model=openai_model,
@@ -115,14 +120,41 @@ def generate_openai_analysis(prompt):
     return completion.choices[0].message.content
 
 
-def update_report_sheet(sheet, analysis, row_start):
+def generate_analysis_prompt(prev_data, now_data):
     """
-    Update the report sheet with analysis content.
+    Generate a prompt for analyzing shopping list changes.
     """
-    current_dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    sheet.cell(row=row_start, column=1, value=f"{current_dt} 기준")
-    sheet.cell(row=row_start + 1, column=1, value=analysis)
-    sheet.cell(row=row_start + 1, column=1).alignment = openpyxl.styles.Alignment(wrap_text=True)
+    return f"""
+    너는 데이터분석 전문가야.
+    다음 두 상품 목록을 비교 분석해 변화 패턴을 도출해주세요:
+    
+    prev_list(변경 전): {prev_data}
+    now_list(변경 후): {now_data}
+    
+    분석 요구사항:
+    1. 상품 정보의 구조적 변화(형식, 필드값 등) 파악
+    2. 상품 가격, 재고, 카테고리 등 주요 속성 변화 탐지
+    3. 쇼핑몰별 상품 분포 변화 분석
+    4. 브랜드/제조사 정보 변경 사항 확인
+    5. 새로 추가되거나 삭제된 상품 식별
+    
+    결과물 요청사항:
+    - 변화의 핵심 패턴을 3-5개 포인트로 요약
+    - 구체적인 수치, 상품명, 쇼핑몰명을 포함하여 근거 제시
+    - 한글로 작성, 총 400-500자 이내로 간결하게 작성
+    - 마크다운, HTML 태그, 특수기호 사용 금지
+    - 실제 소비자에게 유용한 인사이트 중심으로 작성
+    """
+
+
+def update_report_sheet(sheet, title, content, start_row):
+    """
+    Update the report sheet with the given title and content starting from a specific row.
+    """
+    sheet.cell(row=start_row, column=1, value=title)
+    sheet.cell(row=start_row + 1, column=1, value=content)
+    sheet.cell(row=start_row + 1, column=1).alignment = openpyxl.styles.Alignment(wrap_text=True)
+    print(f"Report updated with '{title}'.")
 
 
 def main():
@@ -133,39 +165,18 @@ def main():
         wb.close()
         return
 
-    shopping_data = fetch_naver_api_data(
-        f"https://openapi.naver.com/v1/search/shop?sort=date&display=20&query={encText}"
-    )
+    shopping_data = fetch_naver_api_data("shop")
     if shopping_data:
         df_shopping = convert_json_to_dataframe(shopping_data)
         update_sheet_with_dataframe(wb['now_list'], df_shopping)
 
-        analysis_prompt = f"""
-        너는 데이터분석 전문가야.
-        다음 두 상품 목록을 비교 분석해 변화 패턴을 도출해주세요:
-        
-        prev_list(변경 전): {[[cell.value for cell in row] for row in wb['prev_list'].iter_rows()]}
-        now_list(변경 후): {[[cell.value for cell in row] for row in wb['now_list'].iter_rows()]}
-        
-        분석 요구사항:
-        1. 상품 정보의 구조적 변화(형식, 필드값 등) 파악
-        2. 상품 가격, 재고, 카테고리 등 주요 속성 변화 탐지
-        3. 쇼핑몰별 상품 분포 변화 분석
-        4. 브랜드/제조사 정보 변경 사항 확인
-        5. 새로 추가되거나 삭제된 상품 식별
-        
-        결과물 요청사항:
-        - 변화의 핵심 패턴을 3-5개 포인트로 요약
-        - 구체적인 수치, 상품명, 쇼핑몰명을 포함하여 근거 제시
-        - 한글로 작성, 총 400-500자 이내로 간결하게 작성
-        - 마크다운, HTML 태그, 특수기호 사용 금지
-        """
-        analysis = generate_openai_analysis(analysis_prompt)
-        update_report_sheet(wb['now_report'], analysis, row_start=3)
+        prev_data = [[cell.value for cell in row] for row in wb['prev_list'].iter_rows()]
+        now_data = [[cell.value for cell in row] for row in wb['now_list'].iter_rows()]
+        analysis_prompt = generate_analysis_prompt(prev_data, now_data)
+        analysis_result = call_openai_api(analysis_prompt)
+        update_report_sheet(wb['now_report'], "오픈 마켓 리포트", analysis_result, 4)
 
-    news_data = fetch_naver_api_data(
-        f"https://openapi.naver.com/v1/search/news?sort=date&display=20&query={encText}"
-    )
+    news_data = fetch_naver_api_data("news")
     if news_data:
         news_prompt = f"""
         너는 뉴스 요약 전문가야.
@@ -183,8 +194,8 @@ def main():
         - 글머리를 활용하여 명확하고 간결한 요약 작성
         - 마크다운, HTML 태그, 특수기호 사용 금지
         """
-        news_analysis = generate_openai_analysis(news_prompt)
-        update_report_sheet(wb['now_report'], news_analysis, row_start=7)
+        news_summary = call_openai_api(news_prompt)
+        update_report_sheet(wb['now_report'], "네이버 뉴스 분석", news_summary, 7)
 
     wb.save(file_path)
     print("Workbook saved and closed.")
