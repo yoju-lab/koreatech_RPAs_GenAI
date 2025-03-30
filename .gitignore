@@ -174,3 +174,5 @@ cython_debug/
 .pypirc
 !dockers/.env
 genai_rpa*.xls*
+codes/07_tasks/*.json
+codes/07_tasks/*.xlsx
