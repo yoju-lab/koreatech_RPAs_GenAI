@@ -18,3 +18,4 @@ openpyxl
 xlrd
 xlwt
 xlutils
+fpdf

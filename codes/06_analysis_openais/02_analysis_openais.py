@@ -84,9 +84,6 @@ def get_naver_shopping_list_data():
 def handle_list_sheet(wb):
     # 2. 현재 시각을 기반으로 백업 파일 생성
     timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-    backup_file = f"genai_rpa_{timestamp}.xlsx"
-    shutil.copy(file_path, backup_file)
-    print(f"Backup created: {backup_file}")
 
     # 3. 'prev_list' 시트 삭제 (존재하는 경우)
     if 'prev_list' in wb.sheetnames:
@@ -195,6 +192,8 @@ def update_now_report(wb, analysis):
     # 현재 날짜와 시간(년-월-일 시:분:초) 포맷팅
     current_dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     now_sheet.cell(row=3, column=1, value=f"{current_dt} 기준")
+
+    now_sheet.cell(row=4, column=1, value=f"오픈 마켓 리포트")
 
     now_sheet.cell(row=5, column=1, value=analysis)
     now_sheet.cell(row=5, column=1).alignment = openpyxl.styles.Alignment(wrap_text=True)
