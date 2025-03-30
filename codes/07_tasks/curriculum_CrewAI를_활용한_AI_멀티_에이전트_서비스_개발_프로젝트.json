@@ -1,0 +1,37 @@
+{
+  "topic": "CrewAI를 활용한 AI 멀티 에이전트 서비스 개발 프로젝트",
+  "description": "AI 멀티 에이전트 서비스의 구조와 원리를 이해하고, CrewAI를 활용하여 AI 멀티 에이전트 서비스의 개발 역량을 향상시키는 강의입니다.",
+  "total_hours": 12,
+  "lectures": [
+    {
+      "title": "AI 멀티 에이전트 서비스 소개",
+      "content": "AI 멀티 에이전트 서비스의 개념과 중요성에 대한 소개",
+      "duration": 60
+    },
+    {
+      "title": "CrewAI 소개",
+      "content": "CrewAI의 역할과 기능에 대한 이해",
+      "duration": 60
+    },
+    {
+      "title": "AI 멀티 에이전트 서비스 아키텍처",
+      "content": "AI 멀티 에이전트 서비스의 구조와 기본 아키텍처 소개",
+      "duration": 90
+    },
+    {
+      "title": "CrewAI를 활용한 서비스 구축",
+      "content": "CrewAI를 활용하여 간단한 AI 멀티 에이전트 서비스 구축",
+      "duration": 90
+    },
+    {
+      "title": "딥러닝을 통한 에이전트 학습",
+      "content": "딥러닝을 이용한 AI 에이전트 학습 방법 소개",
+      "duration": 120
+    },
+    {
+      "title": "실전 프로젝트: AI 멀티 에이전트 서비스 구현",
+      "content": "CrewAI를 활용하여 실제 AI 멀티 에이전트 서비스를 구현",
+      "duration": 180
+    }
+  ]
+}
