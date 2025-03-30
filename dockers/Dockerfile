@@ -6,7 +6,7 @@ ARG GIT_URI
 
 # 기본 도구 설치
 RUN apt-get update && apt-get install -y \
-    git \
+    git vim \
     curl \
     wget \
     sudo \
