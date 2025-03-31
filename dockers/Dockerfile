@@ -1,9 +1,5 @@
 FROM python:3.12
 
-ARG GIT_BRANCH_NAME
-ARG APP_DIR_NAME
-ARG GIT_URI
-
 # 기본 도구 설치
 RUN apt-get update && apt-get install -y \
     git vim \
